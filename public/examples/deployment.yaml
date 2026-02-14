@@ -1,0 +1,180 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: deployments.apps.example.com
+spec:
+  group: apps.example.com
+  names:
+    kind: Deployment
+    plural: deployments
+    singular: deployment
+    shortNames:
+      - deploy
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          required:
+            - spec
+          properties:
+            spec:
+              type: object
+              description: Specification of the desired behavior of the Deployment
+              required:
+                - replicas
+                - template
+              properties:
+                replicas:
+                  type: integer
+                  description: Number of desired pods
+                  minimum: 0
+                  maximum: 100
+                  default: 1
+                selector:
+                  type: object
+                  description: Label selector for pods
+                  properties:
+                    matchLabels:
+                      type: object
+                      description: Map of key-value pairs to match
+                      additionalProperties:
+                        type: string
+                template:
+                  type: object
+                  description: Template describes the pods that will be created
+                  required:
+                    - metadata
+                    - spec
+                  properties:
+                    metadata:
+                      type: object
+                      description: Standard object's metadata
+                      properties:
+                        labels:
+                          type: object
+                          description: Map of string keys and values
+                          additionalProperties:
+                            type: string
+                        annotations:
+                          type: object
+                          description: Annotations is an unstructured key value map
+                          additionalProperties:
+                            type: string
+                    spec:
+                      type: object
+                      description: Specification of the desired behavior of the pod
+                      properties:
+                        containers:
+                          type: array
+                          description: List of containers belonging to the pod
+                          minItems: 1
+                          items:
+                            type: object
+                            required:
+                              - name
+                              - image
+                            properties:
+                              name:
+                                type: string
+                                description: Name of the container
+                                minLength: 1
+                                maxLength: 63
+                                pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+                              image:
+                                type: string
+                                description: Docker image name
+                                minLength: 1
+                              command:
+                                type: array
+                                description: Entrypoint array
+                                items:
+                                  type: string
+                              args:
+                                type: array
+                                description: Arguments to the entrypoint
+                                items:
+                                  type: string
+                              env:
+                                type: array
+                                description: List of environment variables
+                                items:
+                                  type: object
+                                  required:
+                                    - name
+                                  properties:
+                                    name:
+                                      type: string
+                                      description: Name of the environment variable
+                                    value:
+                                      type: string
+                                      description: Value of the environment variable
+                              ports:
+                                type: array
+                                description: List of ports to expose
+                                items:
+                                  type: object
+                                  properties:
+                                    containerPort:
+                                      type: integer
+                                      description: Number of port to expose
+                                      minimum: 1
+                                      maximum: 65535
+                                    protocol:
+                                      type: string
+                                      description: Protocol for port
+                                      enum:
+                                        - TCP
+                                        - UDP
+                                        - SCTP
+                                      default: TCP
+                        restartPolicy:
+                          type: string
+                          description: Restart policy for all containers
+                          enum:
+                            - Always
+                            - OnFailure
+                            - Never
+                          default: Always
+            status:
+              type: object
+              description: Most recently observed status of the Deployment
+              properties:
+                replicas:
+                  type: integer
+                  description: Total number of non-terminated pods
+                readyReplicas:
+                  type: integer
+                  description: Number of ready pods
+                availableReplicas:
+                  type: integer
+                  description: Number of available pods
+                conditions:
+                  type: array
+                  description: Current state of the Deployment
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        description: Type of deployment condition
+                      status:
+                        type: string
+                        description: Status of the condition
+                        enum:
+                          - "True"
+                          - "False"
+                          - Unknown
+                      reason:
+                        type: string
+                        description: Reason for the condition's last transition
+                      message:
+                        type: string
+                        description: Human readable message
+                      lastUpdateTime:
+                        type: string
+                        format: date-time
+                        description: Last time the condition was updated

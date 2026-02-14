@@ -1,0 +1,10 @@
+{
+	"recommendations": [
+		"editorconfig.editorconfig",
+		"dbaeumer.vscode-eslint",
+		"esbenp.prettier-vscode",
+		"bradlc.vscode-tailwindcss",
+		"vue.volar",
+		"sdras.vue-vscode-snippets"
+	]
+}

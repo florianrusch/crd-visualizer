@@ -1,0 +1,232 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: certificates.cert-manager.io
+spec:
+  group: cert-manager.io
+  names:
+    kind: Certificate
+    plural: certificates
+    singular: certificate
+    shortNames:
+      - cert
+      - certs
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              description: Desired state of the Certificate resource
+              required:
+                - secretName
+                - issuerRef
+              properties:
+                secretName:
+                  type: string
+                  description: Name of the secret to store the certificate
+                  minLength: 1
+                commonName:
+                  type: string
+                  description: Common name to be used on the Certificate
+                  maxLength: 64
+                dnsNames:
+                  type: array
+                  description: List of DNS names to be used on the Certificate
+                  items:
+                    type: string
+                ipAddresses:
+                  type: array
+                  description: List of IP addresses to be used on the Certificate
+                  items:
+                    type: string
+                    pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+                uris:
+                  type: array
+                  description: List of URI SANs to be used on the Certificate
+                  items:
+                    type: string
+                duration:
+                  type: string
+                  description: Requested duration of the Certificate
+                  pattern: ^\d+(h|m|s)$
+                renewBefore:
+                  type: string
+                  description: Time period before expiration to renew
+                  pattern: ^\d+(h|m|s)$
+                issuerRef:
+                  type: object
+                  description: Reference to the issuer for this certificate
+                  required:
+                    - name
+                  properties:
+                    name:
+                      type: string
+                      description: Name of the Issuer resource
+                      minLength: 1
+                    kind:
+                      type: string
+                      description: Kind of the Issuer resource
+                      enum:
+                        - Issuer
+                        - ClusterIssuer
+                      default: Issuer
+                    group:
+                      type: string
+                      description: Group of the Issuer resource
+                      default: cert-manager.io
+                isCA:
+                  type: boolean
+                  description: Mark certificate as a CA
+                  default: false
+                usages:
+                  type: array
+                  description: Set of x509 usages for the certificate
+                  items:
+                    type: string
+                    enum:
+                      - signing
+                      - digital signature
+                      - content commitment
+                      - key encipherment
+                      - key agreement
+                      - data encipherment
+                      - cert sign
+                      - crl sign
+                      - encipher only
+                      - decipher only
+                      - any
+                      - server auth
+                      - client auth
+                      - code signing
+                      - email protection
+                      - s/mime
+                      - ipsec end system
+                      - ipsec tunnel
+                      - ipsec user
+                      - timestamping
+                      - ocsp signing
+                      - microsoft sgc
+                      - netscape sgc
+                privateKey:
+                  type: object
+                  description: Private key options
+                  properties:
+                    algorithm:
+                      type: string
+                      description: Algorithm used to generate the private key
+                      enum:
+                        - RSA
+                        - ECDSA
+                        - Ed25519
+                      default: RSA
+                    size:
+                      type: integer
+                      description: Size of the private key
+                      minimum: 2048
+                      maximum: 8192
+                      default: 2048
+                    rotationPolicy:
+                      type: string
+                      description: How the private key should be rotated
+                      enum:
+                        - Never
+                        - Always
+                      default: Never
+                keystores:
+                  type: object
+                  description: Keystores configures additional keystore outputs
+                  properties:
+                    jks:
+                      type: object
+                      description: JKS keystore configuration
+                      required:
+                        - create
+                        - passwordSecretRef
+                      properties:
+                        create:
+                          type: boolean
+                          description: Whether to create a JKS keystore
+                        passwordSecretRef:
+                          type: object
+                          description: Reference to a secret containing the password
+                          required:
+                            - name
+                            - key
+                          properties:
+                            name:
+                              type: string
+                              description: Name of the secret
+                            key:
+                              type: string
+                              description: Key in the secret
+                    pkcs12:
+                      type: object
+                      description: PKCS12 keystore configuration
+                      required:
+                        - create
+                        - passwordSecretRef
+                      properties:
+                        create:
+                          type: boolean
+                          description: Whether to create a PKCS12 keystore
+                        passwordSecretRef:
+                          type: object
+                          description: Reference to a secret containing the password
+                          required:
+                            - name
+                            - key
+                          properties:
+                            name:
+                              type: string
+                              description: Name of the secret
+                            key:
+                              type: string
+                              description: Key in the secret
+            status:
+              type: object
+              description: Status of the Certificate
+              properties:
+                conditions:
+                  type: array
+                  description: List of status conditions
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        description: Type of the condition
+                      status:
+                        type: string
+                        description: Status of the condition
+                        enum:
+                          - "True"
+                          - "False"
+                          - Unknown
+                      lastTransitionTime:
+                        type: string
+                        format: date-time
+                        description: Last time the condition transitioned
+                      reason:
+                        type: string
+                        description: Reason for the last transition
+                      message:
+                        type: string
+                        description: Human readable message
+                notBefore:
+                  type: string
+                  format: date-time
+                  description: Time at which the certificate becomes valid
+                notAfter:
+                  type: string
+                  format: date-time
+                  description: Time at which the certificate expires
+                renewalTime:
+                  type: string
+                  format: date-time
+                  description: Time at which the certificate will be renewed

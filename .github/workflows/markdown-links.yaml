@@ -1,0 +1,25 @@
+name: Markdown checks
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions: # added using https://github.com/step-security/secure-repo
+  contents: read
+
+jobs:
+  markdown-link-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Check links in markdown files
+        uses: gaurav-nelson/github-action-markdown-link-check@3c3b66f1f7d0900e37b71eca45b63ea9eedfce31 # v1.0.17
+        with:
+          use-quiet-mode: 'yes'
+          use-verbose-mode: 'yes'
+          check-modified-files-only: 'yes'
+          base-branch: main
