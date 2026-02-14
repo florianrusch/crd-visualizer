@@ -52,7 +52,7 @@ npm run preview
 
 ## Project Structure
 
-```
+```plain
 crd-visualizer/
 ├── components/           # Vue components
 │   ├── CrdInput.vue     # Input area for CRD
